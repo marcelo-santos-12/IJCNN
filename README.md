@@ -1,4 +1,4 @@
-# Local Binary Patterns and its variants on classification of histopathology images (IJCNN)
+# Local Binary Patterns and Its Variants on Classification of Histopathology Images (IJCNN)
 
 1. Download the source code.
 
