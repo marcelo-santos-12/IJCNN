@@ -49,7 +49,7 @@ def _local_binary_pattern(double[:, ::1] image,
 
     # pre-allocate arrays for computation
     cdef double[::1] texture = np.zeros(P, dtype=np.double)
-    cdef signed char[::1] signed_texture = np.zeros(P, dtype=np.int8)
+    cdef signed char[::1] signed_texture = np.zeros(P+1, dtype=np.int8)
     cdef int[::1] rotation_chain = np.zeros(P, dtype=np.int32)
 
     output_shape = (image.shape[0], image.shape[1])
@@ -62,9 +62,9 @@ def _local_binary_pattern(double[:, ::1] image,
     cdef Py_ssize_t r, c, changes, i
     cdef Py_ssize_t rot_index, n_ones
     cdef cnp.int8_t first_zero, first_one
-
+    
     # To compute the variance features
-    cdef double sum_, var_, texture_i
+    cdef double sum_, var_, texture_i, mean
 
     with nogil:
         for r in range(image.shape[0]):
@@ -74,12 +74,27 @@ def _local_binary_pattern(double[:, ::1] image,
                             &image[0, 0], rows, cols, r + rp[i], c + cp[i],
                             b'C', 0, &texture[i])
                 # signed / thresholded texture
+
+                
+                mean = 0
                 for i in range(P):
-                    if texture[i] - image[r, c] >= 0:
+                    mean += texture[i]
+                mean += image[r, c]
+                mean /= P
+
+                for i in range(P):
+                    if texture[i] - mean >= 0:
                         signed_texture[i] = 1
                     else:
                         signed_texture[i] = 0
 
+                # verificando o pixel central
+                
+                if image[r, c] - mean >= 0:
+                    signed_texture[P] = 1
+                else:
+                    signed_texture[P] = 0
+                
                 lbp = 0
 
                 # if method == b'var':
