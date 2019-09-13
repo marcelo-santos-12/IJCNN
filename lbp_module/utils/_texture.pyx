@@ -1,9 +1,10 @@
+from itertools import product
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from libc.math cimport sin, cos, abs, sqrt
 from .interpolation cimport bilinear_interpolation, round
 from cpython cimport array
-
+from libc.stdio cimport printf
 
 ctypedef fused np_ints:
     cnp.int8_t
@@ -35,6 +36,18 @@ cdef extern from "numpy/npy_math.h":
 cdef inline int _bit_rotate_right(int value, int length) nogil:
     return (value >> 1) | ((value & 1) << (length - 1))
 
+cdef signed char[:, ::1] uniforms(int P):
+    def is_uniform(signed_texture, P):
+            changes = 0
+            for i in range(P - 1):
+                changes += (signed_texture[i] - signed_texture[i + 1]) != 0
+            return changes <= 2 if True else False
+
+    gen_comb = product([0, 1], repeat=P)
+    cdef signed char[:, ::1] all_patterns_uniforms_char
+    all_patterns_uniforms = [uniform for uniform in gen_comb if is_uniform(uniform, P)]
+    all_patterns_uniforms_char = np.array(all_patterns_uniforms, dtype=np.int8)
+    return all_patterns_uniforms_char
 
 def _local_binary_pattern(double[:, ::1] image,
                           int P, float R, char method=b'D'):
@@ -66,7 +79,20 @@ def _local_binary_pattern(double[:, ::1] image,
     # To compute the variance features
     cdef double sum_, var_, texture_i
 
+    # To compute Hamming LBP
+    cdef Py_ssize_t n_uniforms = P * (P - 1) + 2
+    cdef Py_ssize_t j, hamming_distance, hamming_distance_previous
+    cdef Py_ssize_t dist_euclid, dist_euclid_previous
+    cdef Py_ssize_t decimal_nonuniform, decimal_uniform
+    cdef signed char[::1] results_signed_texture = np.zeros(P, dtype=np.int8)
+    cdef signed char[:, ::1] all_uniforms = uniforms(P)
+    
     with nogil:
+
+        # for j in range(n_uniforms):
+        #    for i in range(P):
+        #        printf("%d\n", all_uniforms[j, i])
+        
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
                 for i in range(P):
@@ -82,78 +108,134 @@ def _local_binary_pattern(double[:, ::1] image,
 
                 lbp = 0
 
-                # if method == b'var':
-                if method == b'V':
-                    # Compute the variance without passing from numpy.
-                    # Following the LBP paper, we're taking a biased estimate
-                    # of the variance (ddof=0)
-                    sum_ = 0.0
-                    var_ = 0.0
-                    for i in range(P):
-                        texture_i = texture[i]
-                        sum_ += texture_i
-                        var_ += texture_i * texture_i
-                    var_ = (var_ - (sum_ * sum_) / P) / P
-                    if var_ != 0:
-                        lbp = var_
-                    else:
-                        lbp = NAN
                 # if method == b'uniform':
-                elif method == b'U' or method == b'N':
+                if method == b'U':
                     # determine number of 0 - 1 changes
                     changes = 0
                     for i in range(P - 1):
                         changes += (signed_texture[i]
                                     - signed_texture[i + 1]) != 0
-                    if method == b'N':
+                    
+                    # We have a uniform pattern
+                    if changes <= 2:
+                        for i in range(P):
+                            lbp += signed_texture[i]
 
-                        if changes <= 2:
-                            # We have a uniform pattern
-                            n_ones = 0  # determines the number of ones
-                            first_one = -1  # position was the first one
-                            first_zero = -1  # position of the first zero
-                            for i in range(P):
-                                if signed_texture[i]:
-                                    n_ones += 1
-                                    if first_one == -1:
-                                        first_one = i
-                                else:
-                                    if first_zero == -1:
-                                        first_zero = i
-                            if n_ones == 0:
-                                lbp = 0
-                            elif n_ones == P:
-                                lbp = P * (P - 1) + 1
-                            else:
-                                if first_one == 0:
-                                    rot_index = n_ones - first_zero
-                                else:
-                                    rot_index = P - first_one
-                                lbp = 1 + (n_ones - 1) * P + rot_index
-                        else:  # changes > 2
-                            lbp = P * (P - 1) + 2
-                    else:  # method != 'N'
-                        if changes <= 2:
-                            for i in range(P):
-                                lbp += signed_texture[i]
-                        else:
-                            lbp = P + 1
-                else:
-                    # method == b'default'
-                    for i in range(P):
-                        lbp += signed_texture[i] * weights[i]
+                    # We dont have a uniform pattern, lets convert to uniform pattern    
+                    else:
+                        hamming_distance_previous = P
+                        dist_euclid_previous = 2**P - 1
+                        decimal_nonuniform = 0
+                        for i in range(P):
+                            decimal_nonuniform += signed_texture[i] * weights[P - 1 - i]
 
-                    # method == b'ror'
-                    if method == b'R':
-                        # shift LBP P times to the right and get minimum value
-                        rotation_chain[0] = <int>lbp
-                        for i in range(1, P):
-                            rotation_chain[i] = \
-                                _bit_rotate_right(rotation_chain[i - 1], P)
-                        lbp = rotation_chain[0]
-                        for i in range(1, P):
-                            lbp = min(lbp, rotation_chain[i])
+                        for j in range(n_uniforms):
+                            
+                            hamming_distance = 0
+                            for i in range(P): # hamming_distance
+                                hamming_distance += (all_uniforms[j, i] - signed_texture[i]) != 0
+                            
+                            if hamming_distance <= hamming_distance_previous:
+                                
+                                decimal_uniform = 0
+                                for i in range(P):
+                                    decimal_uniform += all_uniforms[j, i] * weights[P - 1 -i]
+                                
+                                dist_euclid = decimal_nonuniform - decimal_uniform
+                                if dist_euclid < 0:
+                                    dist_euclid *= -1
 
+                                if dist_euclid < dist_euclid_previous:
+                                    
+                                    for i in range(P):
+                                        results_signed_texture[i] = all_uniforms[j, i]
+                                    
+                                    # update minimum euclidian distance
+                                    dist_euclid_previous = dist_euclid
+                                
+                                # update minimum hamming distance
+                                hamming_distance_previous = hamming_distance
+                        
+                        for i in range(P):            
+                            lbp += results_signed_texture[i]
+                        
                 output[r, c] = lbp
 
     return np.asarray(output)
+
+
+
+"""
+    decimal_nonuniform = 0
+    for i in range(P):
+        decimal_nonuniform += signed_texture[i] * weights[P - 1 - i]
+
+    for j in range(n_uniforms):
+        
+        hamming_distance = 0
+        for i in range(P): # hamming_distance
+            hamming_distance += (all_uniforms[j, i] - signed_texture[i]) != 0
+        
+        if hamming_distance <= hamming_distance_previous:
+            
+            decimal_uniform = 0
+            for i in range(P):
+                decimal_uniform += all_uniforms[j, i] * weights[P - 1 - i]
+            
+            dist_euclid = decimal_nonuniform - decimal_uniform
+            if dist_euclid < 0:
+                dist_euclid *= -1
+
+            if dist_euclid < dist_euclid_previous:
+                print('LBP Atual: ', all_uniforms[j])
+                print('Distancia de Hamming: ', hamming_distance)
+                print('Distancia Euclidiana: ', dist_euclid)
+                
+                results_signed_texture = all_uniforms[j]
+                
+                lbp = 0
+                for i in range(P):
+                    lbp += results_signed_texture[i]
+                
+                dist_euclid_previous = dist_euclid
+
+            hamming_distance_previous = hamming_distance
+    
+
+# convert nonuniform pattern to decimal
+                        decimal_nonuniform = 0
+                        for i in range(P):
+                            decimal_nonuniform += signed_texture[i] * weights[P - 1 - i]
+                            
+                        for j in range(n_uniforms):
+                            
+                            # Compute Hamming Distance
+                            hamming_distance = 0
+                            for i in range(P): # hamming_distance
+                                hamming_distance += (all_uniforms[j, i] - signed_texture[i]) != 0
+                            
+                            if hamming_distance <= hamming_distance_previous:
+                                
+                                # convert uniform pattern to decimal
+                                decimal_uniform = 0
+                                for i in range(P):
+                                    decimal_uniform += all_uniforms[j, i] * weights[P - 1 - i]
+                                
+                                # Compute Euclidian Distance
+                                dist_euclid = decimal_nonuniform - decimal_uniform
+                                if dist_euclid < 0: # absolute of Euclidian Distance
+                                    dist_euclid *= -1
+
+                                if dist_euclid < dist_euclid_previous:
+                                    
+                                    # Update New texture 
+                                    lbp = 0
+                                    for i in range(P):
+                                        lbp += all_uniforms[j, i]
+
+                                    dist_euclid_previous = dist_euclid
+                                
+                                hamming_distance_previous = hamming_distance
+
+
+"""
