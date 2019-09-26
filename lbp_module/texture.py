@@ -11,10 +11,10 @@ def local_binary_pattern(image, P, R, method='default'):
 
     methods = {
         'default': ord('D'),
-        'ror': ord('R'),
-        'uniform': ord('U'),
-        'nri_uniform': ord('N'),
-        'var': ord('V')
+        'improved': ord('I'),
+        'completed': ord('C'),
+        'hamming': ord('H'),
+        'extended': ord('E')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])

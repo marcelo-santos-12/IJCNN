@@ -1,6 +1,6 @@
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from libc.math cimport sin, cos, fabs
 from .interpolation cimport bilinear_interpolation, round
 from cpython cimport array
 
@@ -39,17 +39,19 @@ cdef inline int _bit_rotate_right(int value, int length) nogil:
 def _local_binary_pattern(double[:, ::1] image,
                           int P, float R, char method=b'D'):
 
-    # texture weights
-    cdef int[::1] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
     rr = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.double) / P)
     cc = R * np.cos(2 * np.pi * np.arange(P, dtype=np.double) / P)
     cdef double[::1] rp = np.round(rr, 5)
     cdef double[::1] cp = np.round(cc, 5)
-
-    # pre-allocate arrays for computation
     cdef double[::1] texture = np.zeros(P, dtype=np.double)
-    cdef signed char[::1] signed_texture = np.zeros(P+1, dtype=np.int8)
+
+    if method == b'I': # For Improved LBP
+        P += 1 # for central pixel
+    
+    cdef signed char[::1] signed_texture = np.zeros(P, dtype=np.int8)
+    cdef int[::1] weights = 2 ** np.arange(P, dtype=np.int32)
+
     cdef int[::1] rotation_chain = np.zeros(P, dtype=np.int32)
 
     output_shape = (image.shape[0], image.shape[1])
@@ -64,41 +66,40 @@ def _local_binary_pattern(double[:, ::1] image,
     cdef cnp.int8_t first_zero, first_one
     
     # To compute the variance features
-    cdef double sum_, var_, texture_i, mean
+    cdef double sum_, var_, texture_i
+
+    # To compute Improved LBP
+    cdef double mean
 
     with nogil:
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
-                for i in range(P):
+                for i in range(P-1):
                     bilinear_interpolation[cnp.float64_t, double, double](
                             &image[0, 0], rows, cols, r + rp[i], c + cp[i],
                             b'C', 0, &texture[i])
-                # signed / thresholded texture
-
                 
-                mean = 0
-                for i in range(P):
-                    mean += texture[i]
-                mean += image[r, c]
-                mean /= P
+                # IMPROVED LBP --> 'improved'
+                if method == b'I':
+                    mean = 0
+                    for i in range(P-1):
+                        mean += texture[i]
+                    mean += image[r, c]
+                    mean /= P
 
-                for i in range(P):
-                    if texture[i] - mean >= 0:
-                        signed_texture[i] = 1
-                    else:
-                        signed_texture[i] = 0
-
-                # verificando o pixel central
-                
-                if image[r, c] - mean >= 0:
-                    signed_texture[P] = 1
-                else:
-                    signed_texture[P] = 0
-                
-                lbp = 0
-
+                    # verifing the neighboor pixels
+                    for i in range(P-1):                        
+                        signed_texture[i] = 1 if texture[i] >= mean else 0
+                        
+                    # verifing the central pixel
+                    signed_texture[P-1] = 1 if image[r, c] >= mean else 0
+                    
+                    lbp = 0
+                    for i in range(P):
+                        lbp += signed_texture[i] * weights[i]
+                        
                 # if method == b'var':
-                if method == b'V':
+                elif method == b'V':
                     # Compute the variance without passing from numpy.
                     # Following the LBP paper, we're taking a biased estimate
                     # of the variance (ddof=0)
