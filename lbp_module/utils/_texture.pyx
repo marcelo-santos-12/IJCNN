@@ -1,6 +1,6 @@
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from libc.math cimport sin, cos, fabs
 from .interpolation cimport bilinear_interpolation, round
 from cpython cimport array
 
@@ -35,6 +35,13 @@ cdef extern from "numpy/npy_math.h":
 cdef inline int _bit_rotate_right(int value, int length) nogil:
     return (value >> 1) | ((value & 1) << (length - 1))
 
+def to_bin(aux_absolute):
+    n_bits=3
+    binary = [0, 0, 0]
+    for j in range(n_bits): # Decimal to Binary
+        binary[j] = 1 if (aux_absolute & 1) == 1 else 0
+        aux_absolute = aux_absolute >> 1
+    return binary
 
 def _local_binary_pattern(double[:, ::1] image,
                           int P, float R, char method=b'D'):
@@ -66,6 +73,24 @@ def _local_binary_pattern(double[:, ::1] image,
     # To compute the variance features
     cdef double sum_, var_, texture_i
 
+    # To compute Extended LBP
+    cdef Py_ssize_t n_bits = 3
+    cdef int absolute_difference
+    cdef int j, aux_absolute
+    cdef signed char [::1] layer1_aux = np.zeros(P, dtype=np.int8) # Original LBP
+    cdef signed char[::1] layer2_aux = np.zeros(P, dtype=np.int8)
+    cdef signed char[::1] layer3_aux = np.zeros(P, dtype=np.int8)
+    cdef signed char[::1] layer4_aux = np.zeros(P, dtype=np.int8)
+    cdef signed char[::1] binary = np.zeros(n_bits, dtype=np.int8)
+    cdef double[:, ::1] output_layer1 = np.zeros(output_shape, dtype=np.double)
+    cdef double[:, ::1] output_layer2 = np.zeros(output_shape, dtype=np.double)
+    cdef double[:, ::1] output_layer3 = np.zeros(output_shape, dtype=np.double)
+    cdef double[:, ::1] output_layer4 = np.zeros(output_shape, dtype=np.double)
+    cdef double layer1_lbp
+    cdef double layer2_lbp
+    cdef double layer3_lbp
+    cdef double layer4_lbp
+
     with nogil:
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
@@ -74,86 +99,39 @@ def _local_binary_pattern(double[:, ::1] image,
                             &image[0, 0], rows, cols, r + rp[i], c + cp[i],
                             b'C', 0, &texture[i])
                 # signed / thresholded texture
-                for i in range(P):
+                for i in range(P): 
                     if texture[i] - image[r, c] >= 0:
-                        signed_texture[i] = 1
+                        layer1_aux[i] = 1
                     else:
-                        signed_texture[i] = 0
+                        layer1_aux[i] = 0
 
-                lbp = 0
+                    absolute_difference = int(fabs(texture[i] - image[r, c]))
 
-                # if method == b'var':
-                if method == b'V':
-                    # Compute the variance without passing from numpy.
-                    # Following the LBP paper, we're taking a biased estimate
-                    # of the variance (ddof=0)
-                    sum_ = 0.0
-                    var_ = 0.0
-                    for i in range(P):
-                        texture_i = texture[i]
-                        sum_ += texture_i
-                        var_ += texture_i * texture_i
-                    var_ = (var_ - (sum_ * sum_) / P) / P
-                    if var_ != 0:
-                        lbp = var_
-                    else:
-                        lbp = NAN
-                # if method == b'uniform':
-                elif method == b'U' or method == b'N':
-                    # determine number of 0 - 1 changes
-                    changes = 0
-                    for i in range(P - 1):
-                        changes += (signed_texture[i]
-                                    - signed_texture[i + 1]) != 0
-                    if method == b'N':
+                    aux_absolute =  absolute_difference if absolute_difference < 7 else 7 # According the original article
+                    
+                    for j in range(n_bits): # Decimal to Binary
+                        binary[j] = 1 if (aux_absolute & 1) == 1 else 0
+                        aux_absolute = aux_absolute >> 1
 
-                        if changes <= 2:
-                            # We have a uniform pattern
-                            n_ones = 0  # determines the number of ones
-                            first_one = -1  # position was the first one
-                            first_zero = -1  # position of the first zero
-                            for i in range(P):
-                                if signed_texture[i]:
-                                    n_ones += 1
-                                    if first_one == -1:
-                                        first_one = i
-                                else:
-                                    if first_zero == -1:
-                                        first_zero = i
-                            if n_ones == 0:
-                                lbp = 0
-                            elif n_ones == P:
-                                lbp = P * (P - 1) + 1
-                            else:
-                                if first_one == 0:
-                                    rot_index = n_ones - first_zero
-                                else:
-                                    rot_index = P - first_one
-                                lbp = 1 + (n_ones - 1) * P + rot_index
-                        else:  # changes > 2
-                            lbp = P * (P - 1) + 2
-                    else:  # method != 'N'
-                        if changes <= 2:
-                            for i in range(P):
-                                lbp += signed_texture[i]
-                        else:
-                            lbp = P + 1
-                else:
-                    # method == b'default'
-                    for i in range(P):
-                        lbp += signed_texture[i] * weights[i]
+                    layer2_aux[i] = binary[0]
+                    layer3_aux[i] = binary[1]
+                    layer4_aux[i] = binary[2]
+                    
+                layer1_lbp = 0
+                layer2_lbp = 0
+                layer3_lbp = 0
+                layer4_lbp = 0
 
-                    # method == b'ror'
-                    if method == b'R':
-                        # shift LBP P times to the right and get minimum value
-                        rotation_chain[0] = <int>lbp
-                        for i in range(1, P):
-                            rotation_chain[i] = \
-                                _bit_rotate_right(rotation_chain[i - 1], P)
-                        lbp = rotation_chain[0]
-                        for i in range(1, P):
-                            lbp = min(lbp, rotation_chain[i])
+                for i in range(P):
+                    layer1_lbp += layer1_aux[i] * weights[i]
+                    layer2_lbp += layer2_aux[i] * weights[i]
+                    layer3_lbp += layer3_aux[i] * weights[i]
+                    layer4_lbp += layer4_aux[i] * weights[i]
 
-                output[r, c] = lbp
+                
+                output_layer1[r, c] = layer1_lbp
+                output_layer2[r, c] = layer2_lbp
+                output_layer3[r, c] = layer3_lbp
+                output_layer4[r, c] = layer4_lbp
 
-    return np.asarray(output)
+    return np.asarray(output_layer1), np.asarray(output_layer2), np.asarray(output_layer3), np.asarray(output_layer4)
