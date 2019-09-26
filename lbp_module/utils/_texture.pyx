@@ -46,9 +46,7 @@ def _local_binary_pattern(double[:, ::1] image,
     cdef double[::1] cp = np.round(cc, 5)
     cdef double[::1] texture = np.zeros(P, dtype=np.double)
 
-    if method == b'I': # For Improved LBP
-        P += 1 # for central pixel
-    
+    P += 1
     cdef signed char[::1] signed_texture = np.zeros(P, dtype=np.int8)
     cdef int[::1] weights = 2 ** np.arange(P, dtype=np.int32)
 
