@@ -6,7 +6,63 @@ import numpy as np
 import warnings
 from .utils._texture import _local_binary_pattern
 
-def local_binary_pattern(image, P, R, method='default'):
+def base_lbp(image, P, R, method='default'):
+    check_nD(image, 2)
+
+    methods = {
+        'default': ord('D'),
+        'ror': ord('R'),
+        'uniform': ord('U'),
+        'nri_uniform': ord('N'),
+        'var': ord('V')
+    }
+    image = np.ascontiguousarray(image, dtype=np.double)
+    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    return output
+
+def improved_lbp(image, P, R, method='default'):
+    check_nD(image, 2)
+
+    methods = {
+        'default': ord('D'),
+        'ror': ord('R'),
+        'uniform': ord('U'),
+        'nri_uniform': ord('N'),
+        'var': ord('V')
+    }
+    image = np.ascontiguousarray(image, dtype=np.double)
+    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    return output
+
+def extendend_lbp(image, P, R, method='default'):
+    check_nD(image, 2)
+
+    methods = {
+        'default': ord('D'),
+        'ror': ord('R'),
+        'uniform': ord('U'),
+        'nri_uniform': ord('N'),
+        'var': ord('V')
+    }
+    image = np.ascontiguousarray(image, dtype=np.double)
+    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    return output
+
+def hamming_lbp(image, P, R, method='default'):
+    check_nD(image, 2)
+
+    methods = {
+        'default': ord('D'),
+        'ror': ord('R'),
+        'uniform': ord('U'),
+        'nri_uniform': ord('N'),
+        'var': ord('V')
+    }
+    image = np.ascontiguousarray(image, dtype=np.double)
+    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    return output
+
+def completed_lbp(image, P, R, method='default'):
     check_nD(image, 2)
 
     methods = {
