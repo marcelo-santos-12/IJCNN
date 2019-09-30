@@ -52,15 +52,12 @@ def extendend_lbp(image, P, R, method='default'):
     output = _extended_local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
-def hamming_lbp(image, P, R, method='default'):
+def hamming_lbp(image, P, R, method='uniform'):
     check_nD(image, 2)
 
     methods = {
-        'default': ord('D'),
-        'ror': ord('R'),
         'uniform': ord('U'),
-        'nri_uniform': ord('N'),
-        'var': ord('V')
+        'nri_uniform': ord('N')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _hamming_local_binary_pattern(image, P, R, methods[method.lower()])
