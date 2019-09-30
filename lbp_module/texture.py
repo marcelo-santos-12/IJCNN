@@ -5,6 +5,10 @@ Methods to characterize image textures.
 import numpy as np
 import warnings
 from .utils._texture import _local_binary_pattern
+from .utils._texture_ilbp import _improved_local_binary_pattern
+from .utils._texture_hlbp import _hamming_local_binary_pattern
+from .utils._texture_elbp import _extended_local_binary_pattern
+from .utils._texture_clbp import _completed_local_binary_pattern
 
 def base_lbp(image, P, R, method='default'):
     check_nD(image, 2)
@@ -31,7 +35,7 @@ def improved_lbp(image, P, R, method='default'):
         'var': ord('V')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
-    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    output = _improved_local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
 def extendend_lbp(image, P, R, method='default'):
@@ -45,7 +49,7 @@ def extendend_lbp(image, P, R, method='default'):
         'var': ord('V')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
-    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    output = _extended_local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
 def hamming_lbp(image, P, R, method='default'):
@@ -59,7 +63,7 @@ def hamming_lbp(image, P, R, method='default'):
         'var': ord('V')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
-    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    output = _hamming_local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
 def completed_lbp(image, P, R, method='default'):
@@ -73,7 +77,7 @@ def completed_lbp(image, P, R, method='default'):
         'var': ord('V')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
-    output = _local_binary_pattern(image, P, R, methods[method.lower()])
+    output = _completed_local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
 def check_nD(array, ndim, arg_name='image'):
