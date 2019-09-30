@@ -1,5 +1,4 @@
-# Para construir arquivo cython e permitir importacao
-#  python setup.py build_ext --inplace
+# Run:  python setup.py build_ext --inplace
 
 import os
 
@@ -14,9 +13,15 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('lbp_module/utils', parent_package, top_path)
 
-    cythonize(['lbp_module/utils/interpolation.pyx', 'lbp_module/utils/_texture.pyx'], working_path=base_path)
+    cythonize(['lbp_module/utils/interpolation.pyx', 'lbp_module/utils/_texture.pyx', 
+               'lbp_module/utils/_texture_ilbp.pyx', 'lbp_module/utils/_texture_hlbp.pyx',
+               'lbp_module/utils/_texture_elbp.pyx', 'lbp_module/utils/_texture_clbp.pyx' ], working_path=base_path)
     config.add_extension('interpolation', sources=['lbp_module/utils/interpolation.c'])
-    config.add_extension('_texture', sources=['lbp_module/utils/_texture.c'])
+    config.add_extension('_texture',      sources=['lbp_module/utils/_texture.c'])
+    config.add_extension('_texture_ilbp', sources=['lbp_module/utils/_texture_ilbp.c'])
+    config.add_extension('_texture_hlbp', sources=['lbp_module/utils/_texture_hlbp.c'])
+    config.add_extension('_texture_elbp', sources=['lbp_module/utils/_texture_elbp.c'])
+    config.add_extension('_texture_clbp', sources=['lbp_module/utils/_texture_clbp.c'])
 
     return config
 
