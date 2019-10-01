@@ -49,7 +49,7 @@ cdef signed char[:, ::1] uniforms(int P):
     return all_patterns_uniforms_char
 
 def _hamming_local_binary_pattern(double[:, ::1] image,
-                          int P, float R, char method=b'D'):
+                          int P, float R, char method=b'U'):
 
     # texture weights
     cdef int[::1] weights = 2 ** np.arange(P, dtype=np.int32)
@@ -163,7 +163,8 @@ def _hamming_local_binary_pattern(double[:, ::1] image,
                         else:
                             rot_index = P - first_one
                         lbp = 1 + (n_ones - 1) * P + rot_index
-            
+                
+                #method == b'U'
                 else:
 
                     for i in range(P):            
