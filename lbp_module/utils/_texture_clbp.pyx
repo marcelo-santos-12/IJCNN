@@ -1,6 +1,6 @@
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from libc.math cimport sin, cos, fabs
 from .interpolation cimport bilinear_interpolation, round
 from cpython cimport array
 
@@ -35,6 +35,12 @@ cdef extern from "numpy/npy_math.h":
 cdef inline int _bit_rotate_right(int value, int length) nogil:
     return (value >> 1) | ((value & 1) << (length - 1))
 
+cdef inline double mean(double[::1] abs_diference) nogil:
+    cdef Py_ssize_t i
+    cdef double mean = 0
+    for i in range(abs_diference.shape[0]):
+        mean += abs_diference[i]
+    return mean / abs_diference.shape[0]
 
 def _completed_local_binary_pattern(double[:, ::1] image,
                           int P, float R, char method=b'D'):
@@ -66,6 +72,17 @@ def _completed_local_binary_pattern(double[:, ::1] image,
     # To compute the variance features
     cdef double sum_, var_, texture_i
 
+    # To compute Completed LBP
+    cdef double[::1] abs_diference = np.zeros(P, dtype=np.double)
+    cdef double abs_mean, clbp_m
+    cdef Py_ssize_t j, c_changes
+    cdef double[:, ::1] output_clbp = np.zeros(output_shape, dtype=np.double)
+    cdef signed char[::1] abs_signed_texture = np.zeros(P, dtype=np.int8)
+    
+    cdef int[::1] c_rotation_chain = np.zeros(P, dtype=np.int32)
+    
+    cdef double c_sum_, c_var_, c_texture_i
+
     with nogil:
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
@@ -79,7 +96,18 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                         signed_texture[i] = 1
                     else:
                         signed_texture[i] = 0
+                
+                    abs_diference[i] = fabs(texture[i] - image[r, c])
+                
+                # thresholding the absolute diference
+                abs_mean = mean(abs_diference)
+                for j in range(P):
+                    if abs_diference[j] - abs_mean >= 0 :
+                        abs_signed_texture[j] = 1
+                    else:
+                        abs_signed_texture[j] = 0
 
+                clbp_m = 0
                 lbp = 0
 
                 # if method == b'var':
@@ -87,24 +115,39 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                     # Compute the variance without passing from numpy.
                     # Following the LBP paper, we're taking a biased estimate
                     # of the variance (ddof=0)
-                    sum_ = 0.0
-                    var_ = 0.0
+                    sum_, c_sum_ = 0.0, 0.0
+                    var_, c_var_ = 0.0, 0.0
                     for i in range(P):
                         texture_i = texture[i]
                         sum_ += texture_i
                         var_ += texture_i * texture_i
+
+                        c_texture_i = abs_diference[i]
+                        c_sum_ += c_texture_i
+                        c_var_ += c_texture_i * c_texture_i
+
                     var_ = (var_ - (sum_ * sum_) / P) / P
                     if var_ != 0:
                         lbp = var_
                     else:
                         lbp = NAN
+
+                    c_var_ = (c_var_ - (c_sum_ * c_sum_) / P) / P
+                    if c_var_ != 0:
+                        clbp_m = c_var_
+                    else:
+                        clbp_m = NAN
+
                 # if method == b'uniform':
                 elif method == b'U' or method == b'N':
                     # determine number of 0 - 1 changes
                     changes = 0
+                    c_changes = 0
                     for i in range(P - 1):
                         changes += (signed_texture[i]
                                     - signed_texture[i + 1]) != 0
+                        c_changes += (abs_signed_texture[i]
+                                    - abs_signed_texture[i + 1]) != 0
                     if method == b'N':
 
                         if changes <= 2:
@@ -132,28 +175,70 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                                 lbp = 1 + (n_ones - 1) * P + rot_index
                         else:  # changes > 2
                             lbp = P * (P - 1) + 2
+                        
+                        if c_changes <= 2:
+                            # We have a uniform pattern
+                            n_ones = 0  # determines the number of ones
+                            first_one = -1  # position was the first one
+                            first_zero = -1  # position of the first zero
+                            for i in range(P):
+                                if abs_signed_texture[i]:
+                                    n_ones += 1
+                                    if first_one == -1:
+                                        first_one = i
+                                else:
+                                    if first_zero == -1:
+                                        first_zero = i
+                            if n_ones == 0:
+                                clbp_m = 0
+                            elif n_ones == P:
+                                clbp_m = P * (P - 1) + 1
+                            else:
+                                if first_one == 0:
+                                    rot_index = n_ones - first_zero
+                                else:
+                                    rot_index = P - first_one
+                                clbp_m = 1 + (n_ones - 1) * P + rot_index
+
+                        else:
+                            clbp_m = P * (P - 1) + 2
                     else:  # method != 'N'
                         if changes <= 2:
                             for i in range(P):
                                 lbp += signed_texture[i]
                         else:
                             lbp = P + 1
+
+                        if c_changes <= 2:
+                            for i in range(P):
+                                clbp_m += abs_signed_texture[i]
+                        else:
+                            clbp_m = P + 1
                 else:
                     # method == b'default'
                     for i in range(P):
                         lbp += signed_texture[i] * weights[i]
+                        clbp_m += abs_signed_texture[i] * weights[i]
 
                     # method == b'ror'
                     if method == b'R':
                         # shift LBP P times to the right and get minimum value
                         rotation_chain[0] = <int>lbp
+                        c_rotation_chain[0] = <int>clbp_m
                         for i in range(1, P):
                             rotation_chain[i] = \
                                 _bit_rotate_right(rotation_chain[i - 1], P)
+                            c_rotation_chain[i] = \
+                                _bit_rotate_right(c_rotation_chain[i - 1], P)
+                            
                         lbp = rotation_chain[0]
+                        clbp_m = c_rotation_chain[0]
+                        
                         for i in range(1, P):
                             lbp = min(lbp, rotation_chain[i])
+                            clbp_m = min(clbp_m, c_rotation_chain[i])
 
                 output[r, c] = lbp
+                output_clbp[r, c] = clbp_m
 
-    return np.asarray(output)
+    return np.asarray([output, output_clbp]) 
