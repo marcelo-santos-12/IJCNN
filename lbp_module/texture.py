@@ -38,15 +38,14 @@ def improved_lbp(image, P, R, method='default'):
     output = _improved_local_binary_pattern(image, P, R, methods[method.lower()])
     return output
 
-def extendend_lbp(image, P, R, method='default'):
+def extended_lbp(image, P, R, method='default'):
     check_nD(image, 2)
 
     methods = {
         'default': ord('D'),
         'ror': ord('R'),
         'uniform': ord('U'),
-        'nri_uniform': ord('N'),
-        'var': ord('V')
+        'nri_uniform': ord('N')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
     output = _extended_local_binary_pattern(image, P, R, methods[method.lower()])
