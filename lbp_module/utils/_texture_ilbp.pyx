@@ -85,10 +85,10 @@ def _improved_local_binary_pattern(double[:, ::1] image,
 
                 # verifing the neighboor pixels
                 for i in range(P-1):                        
-                    signed_texture[i] = 1 if texture[i] >= mean else 0
+                    signed_texture[i] = 1 if texture[i] > mean else 0
                     
                 # verifing the central pixel
-                signed_texture[P-1] = 1 if image[r, c] >= mean else 0
+                signed_texture[P-1] = 1 if image[r, c] > mean else 0
                 
                 lbp = 0
                         

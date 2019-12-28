@@ -1,6 +1,7 @@
 numpy
 scipy
 scikit-image
+scikit-learn
 matplotlib
 opencv-python
 cython

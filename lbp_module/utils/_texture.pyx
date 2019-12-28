@@ -1,6 +1,6 @@
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from libc.math cimport sin, cos
 from .interpolation cimport bilinear_interpolation, round
 from cpython cimport array
 
