@@ -6,4 +6,4 @@
 ```pip install -r requirements.txt```
 
 3. And then:
-```python setup build_ext -i```
+```python setup.py build_ext -i```
