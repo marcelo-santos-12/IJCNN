@@ -10,6 +10,7 @@ from .utils._texture_hlbp import _hamming_local_binary_pattern
 from .utils._texture_elbp import _extended_local_binary_pattern
 from .utils._texture_clbp import _completed_local_binary_pattern
 from skimage.feature import local_binary_pattern as lbp
+from . import bins_ROR
 
 DEFAULT = 'default'
 ROR = 'ror'
@@ -23,31 +24,6 @@ methods = {
     UNIFORM: ord('U'),
     NRI_UNIFORM: ord('N'),
     VAR: ord('V')
-}
-
-# Foram Obtidos Experimentalmente
-bins_ROR = {
-'4': 6,
-'5': 8,
-'6': 14,
-'7': 20,
-'8': 36,
-'9': 60,
-'10': 108,
-'11': 188,
-'12': 352,
-'13': 632,
-'14': 1182,
-'15': 2192,
-'16': 4116,
-'17': 7712,
-'18': 14602,
-'19': 27596,
-'20': 52488,
-'21': 99880,
-'22': 190746,
-'23': 364724,
-'24': 699252
 }
 
 def base_lbp(image, P, R, method, block,):
