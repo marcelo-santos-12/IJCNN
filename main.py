@@ -14,8 +14,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import roc_curve, auc, recall_score, accuracy_score, precision_score, f1_score
-from sklearn.model_selection import StratifiedKFold
-from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from pygame import mixer
 
 ALGORITHM = {
@@ -36,9 +35,9 @@ VARIANTS = {
 
 def main():
     DATASET = 'DATASET/Breast Cancer/BreakHist_Dataset/40X'
-    VARIANT = 'hamming_lbp'
-    METHOD = 'uniform' # default, uniform, nri_uniform, ror, var
-    P, R = 24, 3
+    VARIANT = 'improved_lbp'
+    METHOD = 'nri_uniform' # default, uniform, nri_uniform, ror, var
+    P, R = 16, 2
 
     print('Resultados: P = {}, R = {}'.format(P, R))
     x_data = []
@@ -81,8 +80,8 @@ def main():
     
     svm_parameters = {
         'kernel': ['linear', 'rbf', 'poly'],
-        'C': [1, 10, 100]
-        #'gamma': [0.0001, 0.00001, 0.000001]
+        'C': [1, 10, 100],
+        'gamma': [0.0001, 0.00001, 0.000001]
     }
     mlp_parameters = {
         'hidden_layer_sizes': [(5,), (10,), (20,), (10, 10)],
@@ -111,8 +110,7 @@ def main():
                 ['Decision Trees', dt, dt_parameters], ['Random Forest', rf, rf_parameters], \
                 ['K-Nearest Neighbor', knn, knn_parameters]]
     
-    classifiers = [['K-Nearest Neighbor', knn, knn_parameters], ['Random Forest', rf, rf_parameters], ['Decision Trees', dt, dt_parameters]]
-
+    classifiers = [['MLP', mlp, mlp_parameters]]
     # METRICAS A SEREM ANALISADAS
     recall = []
     precision = []
@@ -205,7 +203,8 @@ def main():
         print('{}_{}_{}_{}_{}.png'.format(METHOD.upper(), VARIANTS[VARIANT], _id.replace(' ', ''), P, R))
         
         #plt.show()
-        
+        plt.close()
+
         # PRINTANDO RESULTADOS GERAIS DO MODELO
         results = np.asarray([accuracy, recall, precision, f1score])
         id_results = ['accuracy', 'precision', 'recall', 'f1score']

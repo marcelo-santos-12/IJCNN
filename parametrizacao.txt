@@ -4,8 +4,8 @@ A) K-Nearest Neighboor
     1. Base LBP
         a. 'default':     
             P =  8, R = 1 --> {'algorithm': 'kd_tree', 'n_neighbors': 9, 'p': 1, 'weights': 'distance'}
-            P = 16, R = 2 --> ERRO
-            P = 24, R = 3 --> ERRO
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'algorithm': 'ball_tree', 'n_neighbors': 9, 'p': 1, 'weights': 'distance'}
@@ -30,8 +30,8 @@ A) K-Nearest Neighboor
     2. Improved LBP
         a. 'default':     
             P =  8, R = 1 --> {'algorithm': 'kd_tree', 'n_neighbors': 5, 'p': 2, 'weights': 'distance'}
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'algorithm': 'kd_tree', 'n_neighbors': 9, 'p': 1, 'weights': 'distance'}
@@ -69,8 +69,8 @@ A) K-Nearest Neighboor
     4. Completed LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -95,8 +95,8 @@ A) K-Nearest Neighboor
     5. Extended LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL 
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -123,8 +123,8 @@ B) Decision Trees
     1. Base LBP
         a. 'default':     
             P =  8, R = 1 --> {'criterion': 'gini', 'max_depth': 3, 'splitter': 'random'}
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'criterion': 'gini', 'max_depth': 3, 'splitter': 'best'}
@@ -149,8 +149,8 @@ B) Decision Trees
     2. Improved LBP
         a. 'default':     
             P =  8, R = 1 --> {'criterion': 'entropy', 'max_depth': 10, 'splitter': 'best'}
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'criterion': 'gini', 'max_depth': 3, 'splitter': 'random'}
@@ -160,7 +160,7 @@ B) Decision Trees
         c. 'nri_uniform':
             P =  8, R = 1 --> {'criterion': 'gini', 'max_depth': 5, 'splitter': 'random'}
             P = 16, R = 2 --> {'criterion': 'entropy', 'max_depth': 3, 'splitter': 'best'}
-            P = 24, R = 3 --> {'criterion': 'entropy', 'max_depth': 3, 'splitter': 'random'}
+            P = 24, R = 3 -->
 
         d. 'ror':        
             P =  8, R = 1 --> {'criterion': 'entropy', 'max_depth': 3, 'splitter': 'best'}
@@ -183,7 +183,6 @@ B) Decision Trees
             P =  8, R = 1 --> {'criterion': 'entropy', 'max_depth': 5, 'splitter': 'random'}
             P = 16, R = 2 --> {'criterion': 'gini', 'max_depth': 5, 'splitter': 'random'}
             P = 24, R = 3 -->
-
         
     4. Completed LBP
         a. 'default':     
@@ -214,8 +213,8 @@ B) Decision Trees
     5. Extended LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL 
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -241,8 +240,8 @@ C) Random Forest
     1. Base LBP
         a. 'default':     
             P =  8, R = 1 --> {'criterion': 'entropy', 'max_depth': 200, 'n_estimators': 51}
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'criterion': 'entropy', 'max_depth': 50, 'n_estimators': 101}
@@ -267,8 +266,8 @@ C) Random Forest
     2. Improved LBP
         a. 'default':     
             P =  8, R = 1 -->  {'criterion': 'entropy', 'max_depth': 200, 'n_estimators': 101}
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'criterion': 'entropy', 'max_depth': 50, 'n_estimators': 101}
@@ -283,7 +282,7 @@ C) Random Forest
         d. 'ror':
             P =  8, R = 1 --> {'criterion': 'gini', 'max_depth': 200, 'n_estimators': 51}
             P = 16, R = 2 --> {'criterion': 'gini', 'max_depth': 10, 'n_estimators': 101}
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -306,8 +305,8 @@ C) Random Forest
     4. Completed LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -322,7 +321,7 @@ C) Random Forest
         d. 'ror':        
             P =  8, R = 1 -->
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -332,8 +331,8 @@ C) Random Forest
     5. Extended LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -359,23 +358,23 @@ D) Multi Layers Perceptron
     1. Base LBP
         a. 'default':     
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (20,), 'max_iter': 50, 'solver': 'sgd'}
-            P = 16, R = 2 -->
-            P = 24, R = 3 --> 
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (10,), 'max_iter': 200, 'solver': 'adam'}
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> {'activation': 'tanh', 'hidden_layer_sizes': (10,), 'max_iter': 50, 'solver': 'sgd'}
+            P = 24, R = 3 --> {'activation': 'tanh', 'hidden_layer_sizes': (20,), 'max_iter': 100, 'solver': 'adam'}
 
         c. 'nri_uniform':
             P =  8, R = 1 --> {'activation': 'logistic', 'hidden_layer_sizes': (10,), 'max_iter': 100, 'solver': 'adam'}
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> {'activation': 'identity', 'hidden_layer_sizes': (20,), 'max_iter': 100, 'solver': 'adam'}
+            P = 24, R = 3 --> {'activation': 'relu', 'hidden_layer_sizes': (10,), 'max_iter': 200, 'solver': 'adam'}
 
         d. 'ror':        
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (10,), 'max_iter': 200, 'solver': 'sgd'}
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -385,8 +384,8 @@ D) Multi Layers Perceptron
     2. Improved LBP
         a. 'default':     
             P =  8, R = 1 --> 
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (10, 10), 'max_iter': 200, 'solver': 'sgd'}
@@ -401,7 +400,7 @@ D) Multi Layers Perceptron
         d. 'ror':
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (20,), 'max_iter': 100, 'solver': 'sgd'}
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -424,8 +423,8 @@ D) Multi Layers Perceptron
     4. Completed LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -440,7 +439,7 @@ D) Multi Layers Perceptron
         d. 'ror':        
             P =  8, R = 1 -->
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -450,8 +449,8 @@ D) Multi Layers Perceptron
     5. Extended LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -466,7 +465,7 @@ D) Multi Layers Perceptron
         d. 'ror':        
             P =  8, R = 1 -->
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -477,8 +476,8 @@ E) Support Vector Machines
     1. Base LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -493,7 +492,7 @@ E) Support Vector Machines
         d. 'ror':        
             P =  8, R = 1 -->
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -503,8 +502,8 @@ E) Support Vector Machines
     2. Improved LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -519,7 +518,7 @@ E) Support Vector Machines
         d. 'ror':        
             P =  8, R = 1 -->
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -542,8 +541,8 @@ E) Support Vector Machines
     4. Completed LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -558,7 +557,7 @@ E) Support Vector Machines
         d. 'ror':        
             P =  8, R = 1 -->
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 -->
@@ -568,8 +567,8 @@ E) Support Vector Machines
     5. Extended LBP
         a. 'default':     
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         b. 'uniform':
             P =  8, R = 1 -->
@@ -584,7 +583,7 @@ E) Support Vector Machines
         d. 'ror':        
             P =  8, R = 1 -->
             P = 16, R = 2 --> 
-            P = 24, R = 3 --> 
+            P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
             P =  8, R = 1 --> 
