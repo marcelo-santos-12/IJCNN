@@ -18,7 +18,7 @@ def main():
     
     P, R = 8, 1
     a = time.time()
-    feature_a = extended_lbp(img, P=P, R=R, method='default')
+    feature_a = extended_lbp(img, P=P, R=R, method='default', block=(1,1))
     print('Tempo: ', time.time() - a)
 
     print(np.asarray(feature_a).shape)

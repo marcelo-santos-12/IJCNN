@@ -1,6 +1,7 @@
 from itertools import product
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def _bit_rotate_right(value, length):
     return (value >> 1) | ((value & 1) << (length - 1))
@@ -8,7 +9,7 @@ def _bit_rotate_right(value, length):
 def ROR(P):
     _ri = []
     rotation_chain = np.zeros(P, np.int)
-    for lbp in range(2**P):
+    for lbp in tqdm(range(2**P)):
         rotation_chain[0] = lbp
         for i in range(1, P):
             rotation_chain[i] = \
@@ -23,11 +24,11 @@ def ROR(P):
 def main():
 
     P = []
-    for i in range(23, 25):
-        print('P = {} --> {}'.format(i, np.unique(ROR(i)).shape))
-        P.append(np.unique(ROR(i)).shape)
-
-    print(P)
+    #for i in range(25, 25):
+    #    print('P = {} --> {}'.format(i, np.unique(ROR(i)).shape))
+    #    P.append(np.unique(ROR(i)).shape)
+    print('Iniciando teste')
+    print(np.unique(ROR(25)).shape)
     
     #x1 = np.arange(4, 14)
     #y1 = np.array([6, 8, 14, 20, 36, 60, 108, 188, 352, 632])
