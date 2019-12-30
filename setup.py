@@ -1,7 +1,7 @@
 # Run:  python setup.py build_ext --inplace
 
 import os
-
+import setuptools
 from distutils.core import setup
 from Cython.Build import cythonize
 
