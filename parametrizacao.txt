@@ -1,4 +1,4 @@
-Escolha dos parâmetros para cada variantes do LBP
+﻿Escolha dos parâmetros para cada variantes do LBP
 
 A) K-Nearest Neighboor
     1. Base LBP
@@ -373,7 +373,7 @@ D) Multi Layers Perceptron
 
         d. 'ror':        
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (10,), 'max_iter': 200, 'solver': 'sgd'}
-            P = 16, R = 2 --> 
+            P = 16, R = 2 --> {'activation': 'identity', 'hidden_layer_sizes': (10,), 'max_iter': 100, 'solver': 'sgd'}
             P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
@@ -390,16 +390,16 @@ D) Multi Layers Perceptron
         b. 'uniform':
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (10, 10), 'max_iter': 200, 'solver': 'sgd'}
             P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 24, R = 3 --> {'activation': 'relu', 'hidden_layer_sizes': (5,), 'max_iter': 100, 'solver': 'adam'}
 
         c. 'nri_uniform':
             P =  8, R = 1 --> ERRO
-            P = 16, R = 2 --> 
-            P = 24, R = 3 -->
+            P = 16, R = 2 --> {'activation': 'logistic', 'hidden_layer_sizes': (5,), 'max_iter': 50, 'solver': 'adam'}
+            P = 24, R = 3 --> {'activation': 'relu', 'hidden_layer_sizes': (5,), 'max_iter': 100, 'solver': 'sgd'}
 
         d. 'ror':
             P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (20,), 'max_iter': 100, 'solver': 'sgd'}
-            P = 16, R = 2 --> 
+            P = 16, R = 2 --> {'activation': 'logistic', 'hidden_layer_sizes': (20,), 'max_iter': 200, 'solver': 'sgd'}
             P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
@@ -410,13 +410,13 @@ D) Multi Layers Perceptron
     3. Hamming LBP
     
         a. 'uniform':
-            P =  8, R = 1 -->
-            P = 16, R = 2 --> 
+            P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (5,), 'max_iter': 200, 'solver': 'adam'}
+            P = 16, R = 2 --> {'activation': 'tanh', 'hidden_layer_sizes': (10,), 'max_iter': 50, 'solver': 'adam'}
             P = 24, R = 3 -->
 
         b. 'nri_uniform':
-            P =  8, R = 1 -->
-            P = 16, R = 2 --> 
+            P =  8, R = 1 --> {'activation': 'tanh', 'hidden_layer_sizes': (5,), 'max_iter': 50, 'solver': 'adam'}
+            P = 16, R = 2 --> {'activation': 'relu', 'hidden_layer_sizes': (10, 10), 'max_iter': 100, 'solver': 'adam'} 
             P = 24, R = 3 -->
 
         
@@ -491,7 +491,7 @@ E) Support Vector Machines
 
         d. 'ror':        
             P =  8, R = 1 -->
-            P = 16, R = 2 --> 
+            P = 16, R = 2 -->  {'activation': 'identity', 'hidden_layer_sizes': (10,), 'max_iter': 200, 'solver': 'adam'}
             P = 24, R = 3 --> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 
         e. 'var':
