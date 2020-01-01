@@ -35,8 +35,8 @@ VARIANTS = {
 
 def main():
     DATASET = 'DATASET/Breast Cancer/BreakHist_Dataset/40X'
-    VARIANT = 'improved_lbp'
-    METHOD = 'nri_uniform' # default, uniform, nri_uniform, ror, var
+    VARIANT = 'extended_lbp'
+    METHOD = 'ror' # default, uniform, nri_uniform, ror, var
     P, R = 16, 2
 
     print('Resultados: P = {}, R = {}'.format(P, R))
@@ -70,8 +70,8 @@ def main():
 
     print('Tamanho do vetor de recursos: ', x_data[0].shape)
     
-    cv = StratifiedKFold(n_splits=5)
-    
+    n_cv = 5
+
     svm = SVC(probability=True)
     mlp = MLPClassifier()
     dt = DecisionTreeClassifier()
@@ -110,7 +110,9 @@ def main():
                 ['Decision Trees', dt, dt_parameters], ['Random Forest', rf, rf_parameters], \
                 ['K-Nearest Neighbor', knn, knn_parameters]]
     
-    classifiers = [['MLP', mlp, mlp_parameters]]
+    classifiers = [['MLP', mlp, mlp_parameters], ['Decision Trees', dt, dt_parameters], ['Random Forest', rf, rf_parameters], \
+                ['K-Nearest Neighbor', knn, knn_parameters]]
+    
     # METRICAS A SEREM ANALISADAS
     recall = []
     precision = []
@@ -119,6 +121,7 @@ def main():
 
     for _id, clf, parameters in classifiers:
         np.random.seed(10)
+        cv = StratifiedKFold(n_splits=n_cv)
         print(35 * ' * ')
         print('Classificando com {}...'.format(_id))
         
