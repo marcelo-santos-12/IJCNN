@@ -110,8 +110,8 @@ def hamming_lbp(image, P, R, method, block,):
 def completed_lbp(image, P, R, method, block,):
     check_nD(image, 2)
     image = np.ascontiguousarray(image, dtype=np.double)
-    output = _completed_local_binary_pattern(image, P, R, methods[method.lower()])    
-    
+    output = _completed_local_binary_pattern(image, P, R, methods[method.lower()])
+
     if method == DEFAULT:
         bins = 2**P
     
@@ -127,7 +127,28 @@ def completed_lbp(image, P, R, method, block,):
     else: # method == VAR
         bins = None
 
-    return histogram(output, bins=bins, block=block)
+    def histogram_completed(output, bins, block):
+        r_range = int(output.shape[1]/block[0])
+        c_range = int(output.shape[2]/block[1])
+        hist = []
+
+        for r in range(0, output.shape[1], r_range):
+            for c in range(0, output.shape[2], c_range):
+
+                # computing histogram 2d of Signal and Center component
+                hist_s_c, _, _ = np.histogram2d(x=output[0].flatten(), y=output[2].flatten(), bins=[bins, 1])
+                
+                # computing histogram 1d of magnitude component
+                hist_m , _ = np.histogram(a=output[1], bins=bins)
+
+                # concatening the histograms computed previously
+                hist_total = hist_s_c.flatten() + hist_m.flatten()
+        
+                hist.extend(list(hist_total))
+                
+        return np.asarray(hist)
+
+    return histogram_completed(output, bins=bins, block=block)
 
 def check_nD(array, ndim, arg_name='image'):
     array = np.asanyarray(array)
