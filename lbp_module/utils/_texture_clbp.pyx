@@ -64,7 +64,7 @@ def _completed_local_binary_pattern(double[:, ::1] image,
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
 
-    cdef double lbp
+    cdef double clbp_s
     cdef Py_ssize_t r, c, changes, i
     cdef Py_ssize_t rot_index, n_ones
     cdef cnp.int8_t first_zero, first_one
@@ -77,12 +77,36 @@ def _completed_local_binary_pattern(double[:, ::1] image,
     cdef double abs_mean, clbp_m
     cdef Py_ssize_t j, c_changes
     cdef double[:, ::1] output_clbp = np.zeros(output_shape, dtype=np.double)
+    cdef double[:, ::1] output_center = np.zeros(output_shape, dtype=np.double)
     cdef signed char[::1] abs_signed_texture = np.zeros(P, dtype=np.int8)
     
     cdef int[::1] c_rotation_chain = np.zeros(P, dtype=np.int32)
     
     cdef double c_sum_, c_var_, c_texture_i
 
+    # Obtaining the information of Magnitude and for the central pixel
+    cdef double sum_magnitude = 0, mean_magnitude
+
+    cdef double mean_gray_scale = np.mean(image)
+    cdef double central_pixel
+    with nogil:
+        for r in range(image.shape[0]):
+            for c in range(image.shape[1]):
+                for i in range(P):
+                    bilinear_interpolation[cnp.float64_t, double, double](
+                            &image[0, 0], rows, cols, r + rp[i], c + cp[i],
+                            b'C', 0, &texture[i])
+                # codign the central pixel
+                if image[r, c] >= mean_gray_scale:
+                    output_center[r, c] = 1
+                
+                for i in range(P):
+                    
+                    sum_magnitude += fabs(texture[i] - image[r, c])
+    
+    mean_magnitude = sum_magnitude / (P * image.shape[0] * image.shape[1])
+
+    
     with nogil:
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
@@ -92,6 +116,7 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                             b'C', 0, &texture[i])
                 # signed / thresholded texture
                 for i in range(P):
+                    # coding the signal
                     if texture[i] - image[r, c] >= 0:
                         signed_texture[i] = 1
                     else:
@@ -99,16 +124,15 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                 
                     abs_diference[i] = fabs(texture[i] - image[r, c])
                 
-                # thresholding the absolute diference
-                abs_mean = mean(abs_diference)
-                for j in range(P):
-                    if abs_diference[j] - abs_mean >= 0 :
-                        abs_signed_texture[j] = 1
+                    # thresholding the absolute diference
+                    # coding the magnitude
+                    if abs_diference[i] >= mean_magnitude :
+                        abs_signed_texture[i] = 1
                     else:
-                        abs_signed_texture[j] = 0
+                        abs_signed_texture[i] = 0
 
                 clbp_m = 0
-                lbp = 0
+                clbp_s = 0
 
                 # if method == b'var':
                 if method == b'V':
@@ -128,9 +152,9 @@ def _completed_local_binary_pattern(double[:, ::1] image,
 
                     var_ = (var_ - (sum_ * sum_) / P) / P
                     if var_ != 0:
-                        lbp = var_
+                        clbp_s = var_
                     else:
-                        lbp = NAN
+                        clbp_s = NAN
 
                     c_var_ = (c_var_ - (c_sum_ * c_sum_) / P) / P
                     if c_var_ != 0:
@@ -164,17 +188,17 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                                     if first_zero == -1:
                                         first_zero = i
                             if n_ones == 0:
-                                lbp = 0
+                                clbp_s = 0
                             elif n_ones == P:
-                                lbp = P * (P - 1) + 1
+                                clbp_s = P * (P - 1) + 1
                             else:
                                 if first_one == 0:
                                     rot_index = n_ones - first_zero
                                 else:
                                     rot_index = P - first_one
-                                lbp = 1 + (n_ones - 1) * P + rot_index
+                                clbp_s = 1 + (n_ones - 1) * P + rot_index
                         else:  # changes > 2
-                            lbp = P * (P - 1) + 2
+                            clbp_s = P * (P - 1) + 2
                         
                         if c_changes <= 2:
                             # We have a uniform pattern
@@ -205,9 +229,9 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                     else:  # method != 'N'
                         if changes <= 2:
                             for i in range(P):
-                                lbp += signed_texture[i]
+                                clbp_s += signed_texture[i]
                         else:
-                            lbp = P + 1
+                            clbp_s = P + 1
 
                         if c_changes <= 2:
                             for i in range(P):
@@ -217,13 +241,13 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                 else:
                     # method == b'default'
                     for i in range(P):
-                        lbp += signed_texture[i] * weights[i]
+                        clbp_s += signed_texture[i] * weights[i]
                         clbp_m += abs_signed_texture[i] * weights[i]
 
                     # method == b'ror'
                     if method == b'R':
                         # shift LBP P times to the right and get minimum value
-                        rotation_chain[0] = <int>lbp
+                        rotation_chain[0] = <int>clbp_s
                         c_rotation_chain[0] = <int>clbp_m
                         for i in range(1, P):
                             rotation_chain[i] = \
@@ -231,14 +255,14 @@ def _completed_local_binary_pattern(double[:, ::1] image,
                             c_rotation_chain[i] = \
                                 _bit_rotate_right(c_rotation_chain[i - 1], P)
                             
-                        lbp = rotation_chain[0]
+                        clbp_s = rotation_chain[0]
                         clbp_m = c_rotation_chain[0]
                         
                         for i in range(1, P):
-                            lbp = min(lbp, rotation_chain[i])
+                            clbp_s = min(clbp_s, rotation_chain[i])
                             clbp_m = min(clbp_m, c_rotation_chain[i])
 
-                output[r, c] = lbp
+                output[r, c] = clbp_s
                 output_clbp[r, c] = clbp_m
 
-    return np.asarray([output, output_clbp]) 
+    return np.asarray([output, output_clbp, output_center])
